@@ -1,18 +1,5 @@
 defmodule EIA do
-  @moduledoc """
-  Documentation for EIA.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> EIA.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def rectangle_area(a, b) do
+    a * b
   end
 end
