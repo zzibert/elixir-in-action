@@ -5,5 +5,7 @@ defmodule EIA do
 
   def sum(a), do: sum(a, 0)
 
-  def sum(a, b), do: a + b
+  defp sum(a, b), do: a + b
+
+  def double(a), do: sum(a, a)
 end
