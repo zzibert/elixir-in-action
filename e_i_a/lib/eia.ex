@@ -1,5 +1,5 @@
 defmodule EIA do
-  def rectangle_area(a, b) do
-    a * b
-  end
+  def area(a), do: area(a, a)
+
+  def area(a, b), do: a * b
 end
