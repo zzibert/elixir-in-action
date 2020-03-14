@@ -1,6 +1,3 @@
 defmodule EIA do
-  outisde_var = 5
-  lambda = fn -> IO.puts(outside_var) end
-  outside_var = 6
-  lambda.()
+  Enum.each(1..3, &IO.puts/1)
 end
