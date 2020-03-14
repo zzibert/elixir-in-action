@@ -1,4 +1,6 @@
 defmodule EIA do
-  square = fn x -> x * x end
-  Enum.each([1, 2, 3], &IO.puts/1)
+  outisde_var = 5
+  lambda = fn -> IO.puts(outside_var) end
+  outside_var = 6
+  lambda.()
 end
