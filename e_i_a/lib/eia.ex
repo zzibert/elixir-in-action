@@ -1,5 +1,5 @@
 defmodule EIA do
-  days = [{:monday, 1}, {:tuesday, 2}]
-  # same as
-  days = [monday: 1, tuesday: 2]
+  days = MapSet.new([:monday, :tuesday, :wednesday])
+  days = MapSet.put(days, :thursday)
+  Enum.each(days, &IO.puts/1)
 end
