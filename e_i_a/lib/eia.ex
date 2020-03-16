@@ -1,9 +1,7 @@
 defmodule EIA do
-  def extract_user(user) do
-    with {:ok, login} <- extract_login(user),
-         {:ok, email} <- extract_email(user),
-         {:ok, password} <- extract_password(user) do
-      {:ok, %{login: login, email: email, password: password}}       
-    end
+  def print(1), do: IO.puts(1)
+  def print(n) do
+    print(n - 1)
+    IO.puts(n)
   end
 end
