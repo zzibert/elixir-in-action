@@ -21,7 +21,4 @@ defmodule Rectangle do
       x when is_number(x) and x > 0 ->
         :positive
     end
-  test_num.(-5)
-  test_num.(0)
-  test_num.(5)
 end
