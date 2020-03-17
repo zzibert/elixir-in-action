@@ -2,8 +2,8 @@ defmodule TodoList do
   require MultiDict
   def new(), do: MultiDict.new()
 
-  def add_entry(todo_list, date, title) do
-    MultiDict.add(todo_list, date)
+  def add_entry(todo_list, entry) do
+    MultiDict.add(todo_list, entry.date, entry)
   end
 
   def entries(todo_list, date) do
