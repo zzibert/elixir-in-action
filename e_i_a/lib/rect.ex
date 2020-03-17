@@ -11,14 +11,14 @@ defmodule Rectangle do
     a * a
   end
 
-  test_num =
-    fn
-      x when is_number(x) and x < 0 ->
-        :negative
+  test_num = fn
+    x when is_number(x) and x < 0 ->
+      :negative
 
-      0 -> :zero
+    0 ->
+      :zero
 
-      x when is_number(x) and x > 0 ->
-        :positive
-    end
+    x when is_number(x) and x > 0 ->
+      :positive
+  end
 end
