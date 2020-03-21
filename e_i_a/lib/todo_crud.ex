@@ -45,3 +45,17 @@ defmodule TodoList do
     %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
   end
 end
+
+defmodule TodoList.CsvImporter do
+  def import() do
+    File.stream!("todos.csv")
+    |> Stream.map(&String.trim(&1))
+    |> Stream.map(&String.split(&1, ","))
+    |> Stream.map(fn [head | tail] -> [String.split(head, "/") | tail] end)
+    |> Stream.map(fn [[year, month, day], title] ->
+      {{String.to_integer(year), String.to_integer(month), String.to_integer(day)}, title}
+    end)
+    |> Stream.map(fn {date, title} -> %{date: date, title: title} end)
+    |> TodoList.new()
+  end
+end
