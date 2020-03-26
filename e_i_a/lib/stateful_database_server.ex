@@ -6,10 +6,6 @@ defmodule DatabaseServer do
     end)
   end
 
-  def add_entry(todo_server, new_entry) do
-    send(todo_server, {:add_entry, new_entry})
-  end
-
   defp loop(connection) do
     receive do
       {:run_query, from_pid, query_def} ->
