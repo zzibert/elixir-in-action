@@ -7,8 +7,23 @@ defmodule TodoServer do
     send(todo_server, {:add_entry, new_entry})
   end
 
+  def entries(todo_server, date) do
+    send(todo_server, {:entries, self(), date})
+    receive do
+      {:entries, entries} ->
+        entries
+      5_000 ->
+        {:error, :timeout}
+    end
+  end
+
   defp process_message(todo_list, {:add_entry, new_entry}) do
     TodoList.add_entry(todo_list, new_entry)
+  end
+
+  defp process_message(todo_list, {:entries, caller, date}) do
+    send(caller, {:entries, TodoList.entries(todo_list, date)})
+    todo_list
   end
 
   defp loop(todo_list) do
