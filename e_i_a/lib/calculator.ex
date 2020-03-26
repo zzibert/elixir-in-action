@@ -1,4 +1,16 @@
 defmodule Calculator do
+  def start do
+    spawn(fn -> loop(0) end)
+  end
+
+  def value(server_pid) do
+    send(server_pid, {:value, self()})
+    receive do
+      {:response, value} ->
+        value
+    end
+  end
+
   defp loop(current_value) do
     new_value =
       receive do
