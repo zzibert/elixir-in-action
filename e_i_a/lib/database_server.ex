@@ -22,6 +22,7 @@ defmodule DatabaseServer do
       {:run_query, caller, query_def} ->
         send(caller, {:query_result, run_query(query_def)})
     end
+
     loop()
   end
 

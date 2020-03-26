@@ -12,6 +12,7 @@ defmodule DatabaseServer do
         query_result = run_query(connection, query_def)
         send(from_pid, {:query_result, query_result})
     end
+
     loop(connection)
   end
 
