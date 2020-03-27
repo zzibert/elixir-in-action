@@ -6,6 +6,10 @@ defmodule ServerProcess do
     end)
   end
 
+  def cast(server_pid, request) do
+    send(server_pid, {:cast, request})
+  end
+
   def call(server_pid, request) do
     send(server_pid, {:call, request, self()})
 
@@ -25,6 +29,14 @@ defmodule ServerProcess do
           )
 
         send(caller, {:response, response})
+
+      {:cast, request} ->
+        new_state =
+          callback_module.handle_cast(
+            request,
+            current_state
+          )
+
         loop(callback_module, new_state)
     end
   end
@@ -40,11 +52,15 @@ defmodule KeyValueStore do
   end
 
   def put(pid, key, value) do
-    ServerProcess.call(pid, {:put, key, value})
+    ServerProcess.cast(pid, {:put, key, value})
   end
 
   def get(pid, key) do
     ServerProcess.call(pid, {:get, key})
+  end
+
+  def handle_cast({:put, key, value}, state) do
+    Map.put(state, key, value)
   end
 
   def handle_call({:put, key, value}, state) do
