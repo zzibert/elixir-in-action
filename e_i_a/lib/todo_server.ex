@@ -9,9 +9,11 @@ defmodule TodoServer do
 
   def entries(todo_server, date) do
     send(todo_server, {:entries, self(), date})
+
     receive do
       {:entries, entries} ->
         entries
+
       5_000 ->
         {:error, :timeout}
     end
@@ -31,6 +33,7 @@ defmodule TodoServer do
       receive do
         message -> process_message(todo_list, message)
       end
+
     loop(new_todo_list)
   end
 end
