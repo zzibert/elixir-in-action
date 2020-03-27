@@ -16,6 +16,7 @@ defmodule KeyValueStore do
   end
 
   def init(_) do
+    :timer.send_interval(5_000, :cleanup)
     {:ok, %{}}
   end
 
@@ -25,6 +26,11 @@ defmodule KeyValueStore do
 
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
+  end
+
+  def handle_info(:cleanup, state) do
+    IO.puts "Performing cleanup"
+    {:noreply, state}
   end
 end
 
