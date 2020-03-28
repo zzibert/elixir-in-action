@@ -1,87 +1,84 @@
-# defmodule TodoServer do
-#   def start do
-#     spawn(fn -> loop(TodoList.new()) end)
-#   end
+defmodule TodoServer do
 
-#   def add_entry(todo_server, new_entry) do
-#     send(todo_server, {:add_entry, new_entry})
-#   end
+  use GenServer
 
-#   def entries(todo_server, date) do
-#     send(todo_server, {:entries, self(), date})
+  # CLIENT #
 
-#     receive do
-#       {:entries, entries} ->
-#         entries
+  def start do
+    GenServer.start(__MODULE__, nil, name: __MODULE__)
+  end
 
-#       5_000 ->
-#         {:error, :timeout}
-#     end
-#   end
+  def add_entry(new_entry) do
+    GenServer.cast(__MODULE__, {:add_entry, new_entry})
+  end
 
-#   defp process_message(todo_list, {:add_entry, new_entry}) do
-#     TodoList.add_entry(todo_list, new_entry)
-#   end
 
-#   defp process_message(todo_list, {:entries, caller, date}) do
-#     send(caller, {:entries, TodoList.entries(todo_list, date)})
-#     todo_list
-#   end
+  def entries(todo_server, date) do
+    GenServer.call(__MODULE__, {:entries, date})
+  end
 
-#   defp loop(todo_list) do
-#     new_todo_list =
-#       receive do
-#         message -> process_message(todo_list, message)
-#       end
+  # CALLBACKS #
 
-#     loop(new_todo_list)
-#   end
-# end
+  @impl GenServer
+  def init(_) do
+    {:ok, TodoList.new()}
+  end
 
-# defmodule TodoList do
-#   defstruct auto_id: 1, entries: %{}
+  @impl GenServer
+  def handle_cast({:add_entry, new_entry}, state) do
+    {:noreply, TodoList.add_entry(state, new_entry)}
+  end
 
-#   def new(entries \\ []) do
-#     Enum.reduce(entries, %TodoList{}, &add_entry(&2, &1))
-#   end
+  @impl GenServer
+  def handle_call({:entries, date}, _, state) do
+    {:reply, TodoList.entries(state, date), state}
+  end
+end
 
-#   def add_entry(todo_list, entry) do
-#     entry = Map.put(entry, :id, todo_list.auto_id)
+defmodule TodoList do
+  defstruct auto_id: 1, entries: %{}
 
-#     new_entries =
-#       Map.put(
-#         todo_list.entries,
-#         todo_list.auto_id,
-#         entry
-#       )
+  def new(entries \\ []) do
+    Enum.reduce(entries, %TodoList{}, &add_entry(&2, &1))
+  end
 
-#     %TodoList{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
-#   end
+  def add_entry(todo_list, entry) do
+    entry = Map.put(entry, :id, todo_list.auto_id)
 
-#   def entries(todo_list, date) do
-#     todo_list.entries
-#     |> Stream.filter(fn {_, entry} -> entry.date == date end)
-#     |> Enum.map(fn {_, entry} -> entry end)
-#   end
+    new_entries =
+      Map.put(
+        todo_list.entries,
+        todo_list.auto_id,
+        entry
+      )
 
-#   def update_entry(todo_list, %{} = new_entry) do
-#     update_entry(todo_list, new_entry.id, fn _ -> new_entry end)
-#   end
+    %TodoList{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
+  end
 
-#   def update_entry(todo_list, entry_id, updater_fun) do
-#     case Map.fetch(todo_list.entries, entry_id) do
-#       :error ->
-#         todo_list
+  def entries(todo_list, date) do
+    todo_list.entries
+    |> Stream.filter(fn {_, entry} -> entry.date == date end)
+    |> Enum.map(fn {_, entry} -> entry end)
+  end
 
-#       {:ok, old_entry} ->
-#         old_entry_id = old_entry.id
-#         new_entry = %{id: ^old_entry_id} = updater_fun.(old_entry)
-#         new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
-#         %TodoList{todo_list | entries: new_entries}
-#     end
-#   end
+  def update_entry(todo_list, %{} = new_entry) do
+    update_entry(todo_list, new_entry.id, fn _ -> new_entry end)
+  end
 
-#   def delete_entry(todo_list, entry_id) do
-#     %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
-#   end
-# end
+  def update_entry(todo_list, entry_id, updater_fun) do
+    case Map.fetch(todo_list.entries, entry_id) do
+      :error ->
+        todo_list
+
+      {:ok, old_entry} ->
+        old_entry_id = old_entry.id
+        new_entry = %{id: ^old_entry_id} = updater_fun.(old_entry)
+        new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
+        %TodoList{todo_list | entries: new_entries}
+    end
+  end
+
+  def delete_entry(todo_list, entry_id) do
+    %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
+  end
+end
