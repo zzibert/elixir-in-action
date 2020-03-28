@@ -1,5 +1,15 @@
 defmodule Todo.Cache do
   use GenServer
+  # INTERFACE #
+
+  def start() do
+    GenServer.start(__MODULE__, nil, name: __MODULE__)
+  end
+
+  def server_process(todo_list_name) do
+    GenServer.call(__MODULE__, {:server_process, todo_list_name})
+  end
+  # CALLBACKS #
 
   def init(_) do
     {:ok, %{}}
