@@ -1,45 +1,11 @@
-defmodule TodoServer do
+defmodule Todo.List do
 
-  use GenServer
+  alias Todo.List
 
-  # CLIENT #
-
-  def start do
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
-  end
-
-  def add_entry(new_entry) do
-    GenServer.cast(__MODULE__, {:add_entry, new_entry})
-  end
-
-
-  def entries(todo_server, date) do
-    GenServer.call(__MODULE__, {:entries, date})
-  end
-
-  # CALLBACKS #
-
-  @impl GenServer
-  def init(_) do
-    {:ok, TodoList.new()}
-  end
-
-  @impl GenServer
-  def handle_cast({:add_entry, new_entry}, state) do
-    {:noreply, TodoList.add_entry(state, new_entry)}
-  end
-
-  @impl GenServer
-  def handle_call({:entries, date}, _, state) do
-    {:reply, TodoList.entries(state, date), state}
-  end
-end
-
-defmodule TodoList do
   defstruct auto_id: 1, entries: %{}
 
   def new(entries \\ []) do
-    Enum.reduce(entries, %TodoList{}, &add_entry(&2, &1))
+    Enum.reduce(entries, %List{}, &add_entry(&2, &1))
   end
 
   def add_entry(todo_list, entry) do
@@ -52,7 +18,7 @@ defmodule TodoList do
         entry
       )
 
-    %TodoList{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
+    %List{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
   end
 
   def entries(todo_list, date) do
@@ -74,11 +40,11 @@ defmodule TodoList do
         old_entry_id = old_entry.id
         new_entry = %{id: ^old_entry_id} = updater_fun.(old_entry)
         new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
-        %TodoList{todo_list | entries: new_entries}
+        %List{todo_list | entries: new_entries}
     end
   end
 
   def delete_entry(todo_list, entry_id) do
-    %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
+    %List{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
   end
 end
