@@ -13,6 +13,8 @@ defmodule Todo.Cache do
   # CALLBACKS #
 
   def init(_) do
+    Todo.Database.start()
+
     {:ok, %{}}
   end
 
