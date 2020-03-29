@@ -21,12 +21,7 @@ defmodule Todo.Server do
 
   @impl GenServer
   def init(name) do
-    state =
-      case Todo.Database.get(name) do
-        content -> content
-        _ -> List.new()
-      end
-    {:ok, %{list: state, name: name}}
+    {:ok, %{list: Todo.Database.get(name) || Todo.List.new(), name: name}}
   end
 
   @impl GenServer
