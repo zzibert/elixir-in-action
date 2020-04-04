@@ -25,6 +25,7 @@ defmodule Todo.Cache do
         {:reply, todo_server, todo_servers}
 
       :error ->
+        IO.puts("Starting to-do server for #{todo_list_name}")
         {:ok, new_server} = Todo.Server.start(todo_list_name)
         {:reply, new_server, Map.put(todo_servers, todo_list_name, new_server)}
     end

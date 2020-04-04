@@ -38,13 +38,13 @@ defmodule Todo.Database do
 
   @impl GenServer
   def handle_call({:choose_worker, key}, _from, workers) do
-    {:reply, Map.get(state, :erlang.phash2(key, 3)), workers}
+    {:reply, Map.get(workers, :erlang.phash2(key, 3)), workers}
   end
 
   # PRIVATE FUNCS #
 
   defp start_workers() do
-    for index <- 0..2, into %{} do
+    for index <- 0..2, %{} do
       {:ok, pid} = Todo.DatabaseWorker.start(@db_folder)
       {index, pid}
     end
