@@ -40,7 +40,6 @@ defmodule Todo.DatabaseWorker do
         _ -> nil
       end
 
-
     {:reply, data, db_folder}
   end
 
