@@ -1,5 +1,5 @@
 defmodule Todo.Server do
-  use GenServer
+  use GenServer, restart: :temporary
 
   alias Todo.List
 
