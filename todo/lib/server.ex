@@ -1,31 +1,53 @@
 defmodule Todo.Server do
-  use Agent, restart: :temporary
+  use GenServer, restart: :temporary
 
   alias Todo.List
 
+  @expiry_idle_timeout :timer.seconds(10)
+
+  # CLIENT #
+
   def start_link(name) do
-    Agent.start_link(
-      fn ->
-        IO.puts("Starting to-do server for #{name}")
-        {name, Todo.Database.get(name) || List.new()}
-      end,
-      name: via_tuple(name)
-    )
+    IO.puts("Starting to-do server for #{name}")
+    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
   end
 
-  def add_entry(todo_server, new_entry) do
-    Agent.cast(todo_server, fn {name, todo_list} ->
-      new_list = List.add_entry(todo_list, new_entry)
-      Todo.Database.store(name, new_list)
-      {name, new_list}
-    end)
+  def add_entry(pid, new_entry) do
+    GenServer.cast(pid, {:add_entry, new_entry})
   end
 
-  def entries(todo_server, date) do
-    Agent.get(
-      todo_server,
-      fn {_name, todo_list} -> List.entries(todo_list, date) end
-    )
+  def entries(pid, date) do
+    GenServer.call(pid, {:entries, date})
+  end
+
+  # CALLBACKS #
+
+  @impl GenServer
+  def init(name) do
+    send(self(), :real_init)
+    {:ok, %{name: name, list: nil}, @expiry_idle_timeout}
+  end
+
+  @impl GenServer
+  def handle_cast({:add_entry, new_entry}, %{list: list, name: name} = state) do
+    new_list = List.add_entry(list, new_entry)
+    Todo.Database.store(name, new_list)
+    {:noreply, %{state | list: new_list}, @expiry_idle_timeout}
+  end
+
+  @impl GenServer
+  def handle_call({:entries, date}, _, %{list: list} = state) do
+    {:reply, List.entries(list, date), state, @expiry_idle_timeout}
+  end
+
+  @impl GenServer
+  def handle_info(:real_init, %{name: name} = state) do
+    {:noreply, %{state | list: Todo.Database.get(name) || Todo.List.new()}, @expiry_idle_timeout}
+  end
+
+  @impl GenServer
+  def handle_info(:timeout, state) do
+    {:stop, :normal, state}
   end
 
   # Private #
