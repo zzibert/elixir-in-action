@@ -8,11 +8,20 @@ defmodule SimpleRegistry do
   end
 
   def register(name) do
-    GenServer.call(__MODULE__, {:register, name, self()})
+    case :ets.insert_new(__MODULE__, {name, self()}) do
+      true ->
+        Process.link(__MODULE__)
+        :ok
+      _ ->
+        :error
+    end
   end
 
   def whereis(name) do
-    GenServer.call(__MODULE__, {:whereis, name})
+    case :ets.lookup(__MODULE__, name) do
+      [{^name, value}] -> value
+      [] -> nil
+    end
   end
 
   # Callbacks
@@ -20,32 +29,14 @@ defmodule SimpleRegistry do
   @impl GenServer
   def init(_) do
     Process.flag(:trap_exit, true)
-    {:ok, %{}}
-  end
-
-  @impl GenServer
-  def handle_call({:register, name, pid}, _, state) do
-    case Map.get(state, name) do
-      nil ->
-        Process.link(pid)
-        {:reply, :ok, Map.put(state, name, pid)}
-      _ ->
-        {:reply, :error, state}
-    end
-  end
-
-  @impl GenServer
-  def handle_call({:whereis, name}, _from, state) do
-    {:reply, Map.get(state, name), state}
+    :ets.new(__MODULE__, [:named_table, :public, write_concurrency: true])
+    {:ok, nil}
   end
 
   @impl GenServer
   def handle_info({:EXIT, pid, _reason}, state) do
-    new_state =
-      state
-      |> Enum.reject(fn {_key, value} -> value == pid end)
-      |> Enum.into(%{})
+    :ets.match_delete(__MODULE__, {:_, pid})
 
-    {:noreply, new_state}
+    {:noreply, state}
   end
 end
