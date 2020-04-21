@@ -4,8 +4,16 @@ defmodule Todo.Database do
 
   # CLIENT #
 
-  def start_link do
+  def child_spec(_) do
     File.mkdir_p!(@db_folder)
+
+    :poolboy.child_spec(__MODULE__, [
+      name: {:local, __MODULE__},
+      worker_module: Todo.DatabaseWorker,
+      size: 3
+    ],
+    [@db_folder]
+    )
 
     children = Enum.map(1..@pool_size, &worker_spec/1)
     Supervisor.start_link(children, strategy: :one_for_one)
