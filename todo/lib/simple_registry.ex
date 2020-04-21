@@ -12,6 +12,7 @@ defmodule SimpleRegistry do
       true ->
         Process.link(__MODULE__)
         :ok
+
       _ ->
         :error
     end
