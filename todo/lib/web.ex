@@ -1,4 +1,6 @@
 defmodule Todo.Web do
+  use Plug.Router
+
   alias Plug.Adapters.Cowboy
 
   def child_spec(_arg) do
