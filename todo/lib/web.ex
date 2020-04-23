@@ -9,7 +9,7 @@ defmodule Todo.Web do
   post "/add_entry" do
     conn = Plug.Conn.fetch_query_params(conn)
     list_name = Map.fetch!(conn.params, "list")
-    title = Map.fetch!(conn_params, "title")
+    title = Map.fetch!(conn.params, "title")
     date = Date.from_iso8601!(Map.fetch!(conn.params, "date"))
 
     list_name
@@ -29,7 +29,7 @@ defmodule Todo.Web do
     entries =
       list_name
       |> Todo.Cache.server_process()
-      |> Toco.Server.entries(date)
+      |> Todo.Server.entries(date)
 
     formatted_entries =
       entries
