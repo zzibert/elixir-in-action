@@ -1,5 +1,4 @@
 defmodule Todo.Cache do
-  use DynamicSupervisor
 
   def start_link() do
     IO.puts("Starting to-do cache.")
