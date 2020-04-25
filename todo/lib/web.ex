@@ -44,7 +44,7 @@ defmodule Todo.Web do
   def child_spec(_arg) do
     Cowboy.child_spec(
       scheme: :http,
-      options: [port: 5454],
+      options: Application.get_all_env(:todo),
       plug: __MODULE__
     )
   end
