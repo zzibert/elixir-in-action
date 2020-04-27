@@ -56,7 +56,7 @@ defmodule Todo.Server do
     {:global, {__MODULE__, name}}
   end
 
-  defp whereis(name) do
+  def whereis(name) do
     case :global.whereis_name({__MODULE__, name}) do
       :undefined -> nil
       pid -> pid
