@@ -25,6 +25,13 @@ defmodule Todo.Cache do
     Todo.Server.whereis(todo_list_name)
   end
 
+  defp new_process(todo_list_name) do
+    case DynamicSupervisor.start_child(__MODULE__, {Todo.Server, todo_list_name}) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
+    end
+  end
+
   defp start_child(todo_list_name) do
     DynamicSupervisor.start_child(
       __MODULE__,
